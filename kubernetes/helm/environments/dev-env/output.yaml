@@ -1,0 +1,384 @@
+---
+# Source: dev-env/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: amdbankdev-configmap
+data:
+  SPRING_PROFILES_ACTIVE: default
+  SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+  SPRING_CLOUD_KUBERNETES_DISCOVERY_DISCOVERY_SERVER_URL: http://spring-cloud-kubernetes-discoveryserver:80/
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak.default.svc.cluster.local:80/realms/master/protocol/openid-connect/certs
+  JAVA_TOOL_OPTIONS: 
+  OTEL_EXPORTER_OTLP_ENDPOINT: 
+  OTEL_METRICS_EXPORTER: 
+  OTEL_LOGS_EXPORTER: 
+  SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: kafka-controller-0.kafka-controller-headless.default.svc.cluster.local:9092
+---
+# Source: dev-env/charts/accounts/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: accounts
+spec:
+  selector:
+    app: accounts
+  type: ClusterIP
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+# Source: dev-env/charts/cards/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: cards
+spec:
+  selector:
+    app: cards
+  type: ClusterIP
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9000
+      targetPort: 9000
+---
+# Source: dev-env/charts/configserver/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: configserver
+spec:
+  selector:
+    app: configserver
+  type: ClusterIP
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8071
+      targetPort: 8071
+---
+# Source: dev-env/charts/gatewayserver/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: gatewayserver
+spec:
+  selector:
+    app: gatewayserver
+  type: LoadBalancer
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8072
+      targetPort: 8072
+---
+# Source: dev-env/charts/loans/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: loans
+spec:
+  selector:
+    app: loans
+  type: ClusterIP
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8090
+      targetPort: 8090
+---
+# Source: dev-env/charts/message/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: message
+spec:
+  selector:
+    app: message
+  type: ClusterIP
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9010
+      targetPort: 9010
+---
+# Source: dev-env/charts/accounts/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: accounts-deployment
+  labels:
+    app: accounts
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: accounts
+
+  template:
+    metadata:
+      labels:
+        app: accounts
+
+    spec:
+      containers:
+        - name: accounts
+          image: "amdbank/accounts:s17"
+
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: accounts
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: amdbankdev-configmap
+                  key: SPRING_PROFILES_ACTIVE
+            - name: SPRING_CONFIG_IMPORT
+              valueFrom:
+                configMapKeyRef:
+                  name: amdbankdev-configmap
+                  key: SPRING_CONFIG_IMPORT
+            - name: SPRING_CLOUD_KUBERNETES_DISCOVERY_DISCOVERY_SERVER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: amdbankdev-configmap
+                  key: SPRING_CLOUD_KUBERNETES_DISCOVERY_DISCOVERY_SERVER_URL
+            - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: amdbankdev-configmap
+                  key: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+---
+# Source: dev-env/charts/cards/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cards-deployment
+  labels:
+    app: cards
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: cards
+
+  template:
+    metadata:
+      labels:
+        app: cards
+
+    spec:
+      containers:
+        - name: cards
+          image: "amdbank/cards:s17"
+
+          ports:
+            - containerPort: 9000
+              protocol: TCP
+
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: cards
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: amdbankdev-configmap
+                  key: SPRING_PROFILES_ACTIVE
+            - name: SPRING_CONFIG_IMPORT
+              valueFrom:
+                configMapKeyRef:
+                  name: amdbankdev-configmap
+                  key: SPRING_CONFIG_IMPORT
+            - name: SPRING_CLOUD_KUBERNETES_DISCOVERY_DISCOVERY_SERVER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: amdbankdev-configmap
+                  key: SPRING_CLOUD_KUBERNETES_DISCOVERY_DISCOVERY_SERVER_URL
+---
+# Source: dev-env/charts/configserver/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: configserver-deployment
+  labels:
+    app: configserver
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: configserver
+
+  template:
+    metadata:
+      labels:
+        app: configserver
+
+    spec:
+      containers:
+        - name: configserver
+          image: "amdbank/configserver:s17"
+
+          ports:
+            - containerPort: 8071
+              protocol: TCP
+
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: configserver
+            - name: SPRING_CLOUD_KUBERNETES_DISCOVERY_DISCOVERY_SERVER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: amdbankdev-configmap
+                  key: SPRING_CLOUD_KUBERNETES_DISCOVERY_DISCOVERY_SERVER_URL
+---
+# Source: dev-env/charts/gatewayserver/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gatewayserver-deployment
+  labels:
+    app: gatewayserver
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: gatewayserver
+
+  template:
+    metadata:
+      labels:
+        app: gatewayserver
+
+    spec:
+      containers:
+        - name: gatewayserver
+          image: "amdbank/gatewayserver:s17"
+
+          ports:
+            - containerPort: 8072
+              protocol: TCP
+
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: gatewayserver
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: amdbankdev-configmap
+                  key: SPRING_PROFILES_ACTIVE
+            - name: SPRING_CONFIG_IMPORT
+              valueFrom:
+                configMapKeyRef:
+                  name: amdbankdev-configmap
+                  key: SPRING_CONFIG_IMPORT
+            - name: SPRING_CLOUD_KUBERNETES_DISCOVERY_DISCOVERY_SERVER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: amdbankdev-configmap
+                  key: SPRING_CLOUD_KUBERNETES_DISCOVERY_DISCOVERY_SERVER_URL
+---
+# Source: dev-env/charts/loans/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loans-deployment
+  labels:
+    app: loans
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: loans
+
+  template:
+    metadata:
+      labels:
+        app: loans
+
+    spec:
+      containers:
+        - name: loans
+          image: "amdbank/loans:s17"
+
+          ports:
+            - containerPort: 8090
+              protocol: TCP
+
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: loans
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: amdbankdev-configmap
+                  key: SPRING_PROFILES_ACTIVE
+            - name: SPRING_CONFIG_IMPORT
+              valueFrom:
+                configMapKeyRef:
+                  name: amdbankdev-configmap
+                  key: SPRING_CONFIG_IMPORT
+            - name: SPRING_CLOUD_KUBERNETES_DISCOVERY_DISCOVERY_SERVER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: amdbankdev-configmap
+                  key: SPRING_CLOUD_KUBERNETES_DISCOVERY_DISCOVERY_SERVER_URL
+---
+# Source: dev-env/charts/message/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-deployment
+  labels:
+    app: message
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: message
+
+  template:
+    metadata:
+      labels:
+        app: message
+
+    spec:
+      containers:
+        - name: message
+          image: "amdbank/message:s17"
+
+          ports:
+            - containerPort: 9010
+              protocol: TCP
+
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: message
+            - name: SPRING_CLOUD_KUBERNETES_DISCOVERY_DISCOVERY_SERVER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: amdbankdev-configmap
+                  key: SPRING_CLOUD_KUBERNETES_DISCOVERY_DISCOVERY_SERVER_URL
+            - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: amdbankdev-configmap
+                  key: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS

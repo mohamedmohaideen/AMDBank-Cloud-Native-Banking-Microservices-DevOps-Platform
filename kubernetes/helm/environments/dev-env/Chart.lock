@@ -1,0 +1,30 @@
+dependencies:
+- name: amdbank-common
+  repository: file://../../amdbank-common
+  version: 0.1.0
+- name: configserver
+  repository: file://../../amdbank-services/configserver
+  version: 0.1.0
+- name: accounts
+  repository: file://../../amdbank-services/accounts
+  version: 0.1.0
+- name: cards
+  repository: file://../../amdbank-services/cards
+  version: 0.1.0
+- name: loans
+  repository: file://../../amdbank-services/loans
+  version: 0.1.0
+- name: gatewayserver
+  repository: file://../../amdbank-services/gatewayserver
+  version: 0.1.0
+- name: message
+  repository: file://../../amdbank-services/message
+  version: 0.1.0
+- name: kafka
+  repository: file://../../kafka
+  version: 1.0.0
+- name: keycloak
+  repository: file://../../keycloak
+  version: 1.0.0
+digest: sha256:b23df14af1d90e1317418fe53f2905c8cebd05a4ea798c7dd9e577f659e96f50
+generated: "2026-08-07T17:31:22.177861428Z"

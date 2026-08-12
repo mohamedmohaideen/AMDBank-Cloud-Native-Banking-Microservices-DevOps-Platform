@@ -1,0 +1,6 @@
+dependencies:
+- name: amdbank-common
+  repository: file://../../amdbank-common
+  version: 0.1.0
+digest: sha256:52f93ab0eedf378b051b53e6cdff0c1e71ea49ade2257e327d56ba6a73b86633
+generated: "2026-07-14T13:35:14.030462583Z"

@@ -1,0 +1,27 @@
+dependencies:
+- name: amdbank-common
+  repository: file://../../amdbank-common
+  version: 0.1.0
+- name: configserver
+  repository: file://../../amdbank-services/configserver
+  version: 0.1.0
+- name: eurekaserver
+  repository: file://../../amdbank-services/eurekaserver
+  version: 0.1.0
+- name: accounts
+  repository: file://../../amdbank-services/accounts
+  version: 0.1.0
+- name: cards
+  repository: file://../../amdbank-services/cards
+  version: 0.1.0
+- name: loans
+  repository: file://../../amdbank-services/loans
+  version: 0.1.0
+- name: gatewayserver
+  repository: file://../../amdbank-services/gatewayserver
+  version: 0.1.0
+- name: message
+  repository: file://../../amdbank-services/message
+  version: 0.1.0
+digest: sha256:5a0b72f03462f555f1a85364679f597d941077015c5168510c7db406c4c1acc3
+generated: "2026-07-15T04:17:02.627120396Z"
