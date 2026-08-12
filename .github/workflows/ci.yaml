@@ -1,0 +1,59 @@
+name: AMDBank CI Pipeline - Build & Test
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - feature/**
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-and-test:
+    name: Build & Test Microservices
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service: [accounts, cards, loans, gatewayserver, configserver, message]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Required for SonarCloud accurate blame & code analysis
+
+      - name: Set up Java 21 JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Cache SonarCloud Packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Build, Test & Run SonarCloud Scan
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          cd ${{ matrix.service }}
+          if [ -f "mvnw" ]; then
+            chmod +x mvnw
+            ./mvnw clean verify sonar:sonar \
+              -Dsonar.projectKey=mohamedmohaideen_AMDBank-${{ matrix.service }} \
+              -Dsonar.organization=mohamedmohaideen \
+              -Dsonar.host.url=https://sonarcloud.io \
+              || ./mvnw clean verify
+          else
+            echo "No Maven Wrapper found in ${{ matrix.service }}, falling back to global mvn"
+            mvn clean verify
+          fi
